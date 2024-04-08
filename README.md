@@ -17,5 +17,14 @@ If you find our work helpful, please consider citing our paper:
 
 ## Code
 
-We will release our scripts very soon.
+For NewsRoom and SummEval
+```python
+bash pairs_run.sh
+```
 
+For Hanna
+```python
+bash pairs_flat_run
+```
+
+More details and comments will be added soon.
