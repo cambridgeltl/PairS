@@ -292,9 +292,9 @@ def calculate_correlation(reference_score, predicted_score):
     print('Spearmans correlation: %.3f' % spearman_corr)
     kendall_tau, _ = scipy.stats.kendalltau(reference_score, predicted_score)
     print('Kendall tau: %.3f' % kendall_tau)
-    mae = mean_absolute_error(reference_score, predicted_score)
-    print('MAE: %.3f' % mae)
-    return spearman_corr, kendall_tau, mae
+    # mae = mean_absolute_error(reference_score, predicted_score)
+    # print('MAE: %.3f' % mae)
+    return spearman_corr, kendall_tau#, mae
 
 
 def correlation_analysis(results):

@@ -1,6 +1,6 @@
 from utils import shuffle_lists, calculate_correlation, load_newsroom, load_summEval, calculate_uncertainty, load_sf_data, CompareResultObject, insert_index_to_anchors
 import random
-from sorting import merge_sort_indices, merge_with_confidence_beam
+from sorting import merge_sort_indices
 import numpy as np
 from tqdm import tqdm
 import json

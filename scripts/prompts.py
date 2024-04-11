@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 
-def get_prompt_template(prompt_name, aspect='coherence', dataset='SumEval', model_name=None, with_input=False):
+def get_prompt_template(prompt_name, aspect='coherence', dataset='SummEval', model_name=None, with_input=False):
     adj_lookup = {'coherence': 'coherent',
                   'fluency': 'fluent',
                   'relevance': 'relevant',
@@ -13,7 +13,7 @@ def get_prompt_template(prompt_name, aspect='coherence', dataset='SumEval', mode
                   'complexity': 'complex',
                   'consistency': 'consistent'}
                   
-    if dataset in ['SumEval', 'newsroom']:
+    if dataset in ['SummEval', 'newsroom']:
         task = 'summarization'
         description = 'summarization'
         text_name = ('summary', 'Summary')
@@ -91,9 +91,9 @@ and 5 indicates excellent {adj_lookup[aspect]}. You must only return the int sco
     return prompt
 
 
-def get_aspect_instruction(aspect, eval_method='pairwise comparison', dataset='SumEval'):
+def get_aspect_instruction(aspect, eval_method='pairwise comparison', dataset='SummEval'):
 
-    if dataset in ['SumEval', 'newsroom']:
+    if dataset in ['SummEval', 'newsroom']:
         task = 'summarization'
         description = 'summarization'
         text_name = 'summary'
