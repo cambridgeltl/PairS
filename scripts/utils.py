@@ -12,9 +12,6 @@ import math
 
 class CompareResultObject:
     def __init__(self, raw_prob_A=0, raw_prob_B=0, raw_prob_C=0, uncertainty=1):
-        # self.prob_A = prob_A
-        # self.prob_B = prob_B
-        # self.prob_C = prob_C
         self.raw_prob_A = raw_prob_A
         self.raw_prob_B = raw_prob_B
         self.raw_prob_C = raw_prob_C
