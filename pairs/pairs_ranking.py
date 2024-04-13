@@ -197,6 +197,12 @@ def merge_with_confidence_beam(indices, left, mid, right, input, output, params)
 
 
 def PairsGreedy(input, output, params):
+    '''
+    Rank the output summaries in ascending order, based on pairwise comparison using greedy algorithm.
+    input: str, the input source text
+    output: list of str, the list of output summaries
+    params: dict, the hyperparameters
+    '''
 
     def rank_greedy(indices, left, right, input, output, params):
         if right - left > 1:
@@ -221,6 +227,12 @@ def PairsGreedy(input, output, params):
 
 
 def PairsBeam(input, output, params):
+    '''
+    Rank the output summaries in ascending order, based on pairwise comparison using beam search algorithm with uncertainty prunning.
+    input: str, the input source text
+    output: list of str, the list of output summaries
+    params: dict, the hyperparameters
+    '''
 
     def rank_beam(indices, left, right, input, output, params):
         if right - left > 1:
