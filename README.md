@@ -9,7 +9,7 @@
 
 ### Ready-to-use Package
 We provide a ready-to-use Python library for Pairwise preference ranking (PairS). We show a ranking demonstration below.
-For an input source text and a sequence of output candidates, ```PairsGreedy``` and ```PairsBeam``` can be used to rank the output candidates in ascending order.
+For an input source text and a sequence of output candidates, ```PairsGreedy``` and ```PairsBeam``` can be used to rank the output candidates in **ascending** order.
 We currently support three base models ```Llama2```, ```Mistral-7B``` and ```GPT-turbo```. 
 
 ```python
