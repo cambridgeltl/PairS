@@ -286,9 +286,9 @@ def calculate_correlation(reference_score, predicted_score):
         # print(reference_score, predicted_score)
         # print(sum(reference_score), sum(predicted_score))
         spearman_corr = 1 if all(element==reference_score[0] for element in reference_score) else 0
-    print('Spearmans correlation: %.3f' % spearman_corr)
+    # print('Spearmans correlation: %.3f' % spearman_corr)
     kendall_tau, _ = scipy.stats.kendalltau(reference_score, predicted_score)
-    print('Kendall tau: %.3f' % kendall_tau)
+    # print('Kendall tau: %.3f' % kendall_tau)
     # mae = mean_absolute_error(reference_score, predicted_score)
     # print('MAE: %.3f' % mae)
     return spearman_corr, kendall_tau#, mae

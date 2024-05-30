@@ -1,3 +1,4 @@
 scripts/__*
 models/
 pairs/__pycache__/
+scripts/rebuttal/

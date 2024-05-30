@@ -168,7 +168,7 @@ def merge_with_confidence_beam(indices, left, mid, right, input, output, params)
                         continue
                     # beam_item_copy.cum_prob *= 1-prob_A if choice == 'A' else prob_A
                     logprob = np.log(1-prob_A+1e-9) if choice == 'A' else np.log(prob_A+1e-9)
-                    beam_item_copy.cum_prob = moving_average(beam_item_copy.cum_prob, logprob*coef, i)
+                    beam_item_copy.cum_prob = moving_average(beam_item_copy.cum_prob, logprob*coef, i+1)
 
                 beam_item_copy.pointer_A += 1 if choice == 'A' else 0
                 beam_item_copy.pointer_B += 1 if choice == 'B' else 0

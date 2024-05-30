@@ -36,19 +36,16 @@ def get_prompt_template(prompt_name, aspect='coherence', dataset='SummEval', mod
     if prompt_name == "pairwise comparison":
         if with_input:
             prompt = dedent(f"""\
+            {input_name[1]}: {{{{ input }}}}
+
             {{{{instruction}}}}
-
-            {input_name[1]}: {{{{ input_1 }}}}
-
-            Compare the following {text_names}:
-            
-            {text_name[1]} A: {{{{ output_1 }}}}
-
-            {text_name[1]} B: {{{{ output_2 }}}}
+            {text_name[1]} candidate A: {{{{ output_1 }}}}
+            {text_name[1]} candidate B: {{{{ output_2 }}}}
                                     
-            Question: Which {text_name[0]} is more {adj_lookup[aspect]}? \
-If the {text_name[0]} A is more {adj_lookup[aspect]}, please return 'A'. If the {text_name[0]} B is more {adj_lookup[aspect]}, please return 'B'. \
-You must only return the choice.
+            Question: Which {text_name[0]} candidate is more {adj_lookup[aspect]}? \
+If the {text_name[0]} A is more {adj_lookup[aspect]}, please return 'A'. \
+If the {text_name[0]} B is more {adj_lookup[aspect]}, please return 'B'. \
+Plese only return the choice.
             Answer: """)
         else:
             prompt = dedent(f"""\
@@ -63,6 +60,36 @@ You must only return the choice.
 If the {text_name[1]} B is more {adj_lookup[aspect]}, please return "B". You must only return the choice.
             Answer: """)
 
+    ###################################################### Pairwise comparison 3-way ######################################################
+    elif prompt_name == "pairwise comparison 3-way":
+        if with_input:
+            prompt = dedent(f"""\
+            {{{{instruction}}}}
+
+            {input_name[1]}: {{{{ input_1 }}}}
+
+            Evaluate and compare the following {text_names}:
+            
+            {text_name[1]} A: {{{{ output_1 }}}}
+
+            {text_name[1]} B: {{{{ output_2 }}}}
+                                    
+            Question: Which {text_name[0]} is more {adj_lookup[aspect]}? \
+If the {text_name[0]} A is more {adj_lookup[aspect]}, please return 'A'. If the {text_name[0]} B is more {adj_lookup[aspect]}, please return 'B'. \
+If both {text_names} are equally {adj_lookup[aspect]}, please return 'C'. Plese only return the choice.
+            Answer: """)
+        else:
+            prompt = dedent(f"""\
+            {{{{instruction}}}}
+            Which {text_name[0]} is more {adj_lookup[aspect]}?
+                            
+            {text_name[1]} A: {{{{ output_1 }}}}
+                            
+            {text_name[1]} B: {{{{ output_2 }}}}
+                                    
+            Question: If the {text_name[1]} A is more {adj_lookup[aspect]}, please return "A". \
+If the {text_name[1]} B is more {adj_lookup[aspect]}, please return "B". You must only return the choice.
+            Answer: """)
 
     ###################################################### Baseline score prompts ######################################################
     elif prompt_name == "score":
@@ -118,10 +145,10 @@ def get_aspect_instruction(aspect, eval_method='pairwise comparison', dataset='S
     instructions = {
         'coherence': {
             'score': f'Please evaluate the coherence of the following {text_name}. ',
-            'pairwise comparison': f'Compare the coherence of the two following {text_names}. ',
-                        # f'Consider aspects such as clarity and logical flow. '
-                        # f"A {text_name} is coherent if it accurately captures the key information from the article, "
-                        # "and presents them in a clear manner."
+            'pairwise comparison': f'Compare the coherence of the two following {text_names}. '
+                        f'Consider aspects such as clarity and logical flow. '
+                        f"A {text_name} is coherent if it accurately captures the key information from the article, "
+                        "and presents them in a clear manner."
         },
         'fluency': {
             'score': f'Please evaluate the fluency of the following {text_name}. ',

@@ -89,6 +89,17 @@ We provide a Notebook demonstrations in ```notebooks/```.
 
 More details and comments will be added soon.
 
+## Algorithm of PairS-Beam
+The PairS-Greedy can be understood as a merge sort with pairwise comparison by LLMs, while the PairS-Beam is to do a beam-search for each merge operation. In order to improve the beam search efficiency and limit the search space, we also apply a local uncertainty-based prunning mechanism.
+
+We show the algorithm of the modified merge operation for PairS-Beam below. 
+
+![algo](figs/algo.png)
+
+
+### A Beam-search Merge Operation Demonstration
+<img src="figs/demo1.png" alt="demo1" width="500" height="auto"/>
+For more details please check out our paper.
 
 ## Citation
 If you find our work helpful, please consider citing our paper:

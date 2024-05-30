@@ -21,6 +21,8 @@ class MistralModelLocal:
                                                             # attn_implementation="flash_attention_2",   # flash attention is not easy to install
                                                             torch_dtype=torch.bfloat16)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name) #, cache_dir="models")
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+
         self.A_ids = self.tokenizer.convert_tokens_to_ids(['A','▁A'])   # A: 330
         self.B_ids = self.tokenizer.convert_tokens_to_ids(['B','▁B'])   # B: 365
         self.C_ids = self.tokenizer.convert_tokens_to_ids(['C','▁C'])   # C: 
