@@ -1,10 +1,10 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 
-python3 scripts/eval_dataset.py  --dataset='newsroom' \
+python3 eval_dataset.py  --dataset='SummEval' \
                     --aspect='coherence' \
                     --eval_method='pairwise comparison' \
                     --eval_size=1600 \
-                    --engine="gpt-3.5-turbo" \
+                    --engine="microsoft/Phi-3-medium-4k-instruct" \
                     --with_input \
                     --confidence_beam \
                     --beam_size=5000 \

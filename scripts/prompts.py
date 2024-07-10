@@ -225,11 +225,3 @@ def get_aspect_instruction(aspect, eval_method='pairwise comparison', dataset='S
         print('Aspect or evaluation method not supported.')
         return None
 
-
-if __name__ == "__main__":
-    prompt = get_aspect_instruction('overall', eval_method='pairwise', dataset='sfhot')
-    print(prompt)
-
-    prompt_instruction = get_prompt_template("pairwise comparison", 'any', aspect='overall', dataset='sfhot')
-
-    print(prompt_instruction)

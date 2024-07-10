@@ -1,5 +1,5 @@
 from pairs import PairsGreedy, PairsBeam
-from scripts.utils import shuffle_lists, load_summEval
+from pairs import shuffle_lists, load_summEval
 
 
 # Load example data
@@ -19,9 +19,11 @@ if method == 'PairsGreedy':
     # Set hyperparameters
     params = {
         # 'engine': "mistralai/Mistral-7B-Instruct-v0.1",
-        'engine': "meta-llama/Llama-2-7b-chat-hf",
+        'engine': "microsoft/Phi-3-medium-4k-instruct",
+        # 'engine': "gpt-3.5-turbo",
         'api_call': 0,
         'with_input': True,
+        'calibrate': False,
     }
     # Rank the output summaries
     indices = PairsGreedy(input[0], output, params)
@@ -36,6 +38,7 @@ elif method == 'PairsBeam':
         'api_call': 0,
         'prob_gap': 0.1,
         'with_input': True,
+        'calibrate': True,
     }
     # Rank the output summaries
     indices = PairsBeam(input[0], output, params)

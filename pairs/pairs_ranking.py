@@ -1,7 +1,8 @@
 from jinja2 import Environment
 from pairs import get_general_prompt_template
 import numpy as np
-from pairs import Llama2ModelLocal, MistralModelLocal, call_openai_chat_completion, extract_prob
+# from pairs import Llama2ModelLocal, MistralModelLocal, call_openai_chat_completion, extract_prob
+from pairs import LocalModel, OpenAIChatModel, CompareResultObject 
 import copy
 from tqdm import tqdm
 
@@ -22,7 +23,10 @@ def moving_average(sum,val,idx):
 
 
 def is_better_than_prob(id1, id2, input, output, params, api_key=None):    
-    prompt_template = get_general_prompt_template(with_input=params['with_input'])
+    if 'prompt_template' in params:
+        prompt_template = params['prompt_template']
+    else:
+        prompt_template = get_general_prompt_template(with_input=params['with_input'])
     environment = Environment()
     prompt_template = environment.from_string(prompt_template)
 
@@ -31,46 +35,23 @@ def is_better_than_prob(id1, id2, input, output, params, api_key=None):
         output_1=output[id1],
         output_2=output[id2],
     )
+    compare_result = params['model'].compare([prompt])[0]
+    
+    if params['calibrate'] == True:
+        prompt = prompt_template.render(
+            input=input,
+            output_1=output[id2],
+            output_2=output[id1],
+        )
+        compare_result_reverse = params['model'].compare([prompt])[0]
+        compare_result = CompareResultObject(
+                raw_prob_A=compare_result.prob_A + 1-compare_result_reverse.prob_B, 
+                raw_prob_B=compare_result.prob_B + 1-compare_result_reverse.prob_A, 
+                raw_prob_C=compare_result.prob_C + compare_result_reverse.prob_C, 
+                uncertainty=(compare_result.uncertainty + compare_result_reverse.uncertainty)/2
+            )
 
-    # print(prompt)
-    # assert False
-    api_params = {
-    'engine': params['engine'], 
-    'temperature':0, 
-    'logprobs':True, 
-    'top_logprobs':5, 
-    'max_tokens': 16,
-    'wait_sec': 0.3,
-    'attempt_num': 10,
-    }
-
-    
-    if 'mistral' in params['engine'] or 'mixtral' in params['engine']:
-        msg = MistralModelLocal.get_mistral_chat_message(prompt)
-        compare_result = params['model'].mistral_compare(msg)
-        # if params['calibration']:
-        #     calibration_shifts = get_calibration_shift(params['engine'], params['dataset'], params['aspect'])
-        #     compare_result.calibraet_shift(calibration_shifts)
-        return compare_result
-    
-    if 'llama' in params['engine']:
-        compare_result = params['model'].compare(prompt)
-        return compare_result
-    
-    else:  # for OpenAI model
-        retry, max_retry = 0, 5
-        while retry < max_retry:
-            try:
-                response = call_openai_chat_completion(prompt, api_params, api_key)
-                compare_result = extract_prob(response, api_params)
-                return compare_result      # prob_A is the probability of A being better than B
-            except Exception as e:
-                print(e)
-                retry += 1
-                if retry >= max_retry:
-                    print('Fail case')
-                    return True
-                
+    return compare_result
                 
 
 def merge(indices, left, mid, right, input, output, params):
@@ -84,9 +65,7 @@ def merge(indices, left, mid, right, input, output, params):
     while i < len(left_copy) and j < len(right_copy):
         if 'progress_bar' in params: params['progress_bar'].update(1)
         compare_result = is_better_than_prob(left_copy[i], right_copy[j], input, output, params)
-        # params['compare_log'][(left_copy[i], right_copy[j])] = compare_result.to_json() #compare_result['prob_A']
         params['api_call'] += 1
-        # print(compare_result)
         if compare_result['prob_A']>compare_result['prob_B']:
             indices[k] = right_copy[j]
             j += 1
@@ -120,20 +99,16 @@ def merge_with_confidence_beam(indices, left, mid, right, input, output, params)
     def get_probA(i, j):
         if prob_A_matrix[i, j] == 0:
             compare_result = is_better_than_prob(left_copy[i], right_copy[j], input, output, params)
-            # print(compare_result)
             prob_A_matrix[i,j] = compare_result['prob_A']
-            # uncertainty_matrix[i,j] = compare_result['uncertainty']
             params['api_call'] += 1
             if 'progress_bar' in params: params['progress_bar'].update(1)
-            # params['compare_log'][(left_copy[i], right_copy[j])] = compare_result.to_json()
-        return prob_A_matrix[i, j]#, uncertainty_matrix[i,j]
+        return prob_A_matrix[i, j]
 
     left_copy = indices[left:mid]
     right_copy = indices[mid:right]
 
     beam_size = params['beam_size']
     prob_A_matrix = np.zeros((len(left_copy), len(right_copy)))  # prob_A_matrix[i, j] is the probability of A better than B 
-    # uncertainty_matrix = np.ones_like(prob_A_matrix)  # uncertainty_matrix[i, j] is the uncertainty of A is better
     prob_A_matrix[0, 0] = get_probA(0, 0)
     prob_gap = params['prob_gap']
 
@@ -195,7 +170,6 @@ def merge_with_confidence_beam(indices, left, mid, right, input, output, params)
     indices[left:right] = sorted_index
 
 
-
 def PairsGreedy(input, output, params):
     '''
     Rank the output summaries in ascending order, based on pairwise comparison using greedy algorithm.
@@ -203,7 +177,6 @@ def PairsGreedy(input, output, params):
     output: list of str, the list of output summaries
     params: dict, the hyperparameters
     '''
-
     def rank_greedy(indices, left, right, input, output, params):
         if right - left > 1:
             mid = (left + right) // 2
@@ -211,19 +184,17 @@ def PairsGreedy(input, output, params):
             rank_greedy(indices, mid, right, input, output, params)
             merge(indices, left, mid, right, input, output, params)
         return indices
-
-
-    if params['engine'] in ["mistralai/Mistral-7B-Instruct-v0.1", "mistralai/Mistral-7B-Instruct-v0.2"]:
-        params['model'] = MistralModelLocal(params={'model': params['engine']})
-    elif 'llama' in params['engine']:
-        params['model'] = Llama2ModelLocal(params={'model': params['engine']})
     
+    if 'model' not in params:
+        if 'gpt' in params['engine']:
+            params['model'] = OpenAIChatModel({'engine': params['engine']})
+        else:
+            params['model'] = LocalModel(params={'model': params['engine']})
     params['progress_bar'] = tqdm(total=int(len(output) * np.log2(len(output))), desc='Processing')
 
     indices = list(range(len(output)))
     indices = rank_greedy(indices, 0, len(indices), input, output, params)
     return indices
-
 
 
 def PairsBeam(input, output, params):
@@ -233,7 +204,6 @@ def PairsBeam(input, output, params):
     output: list of str, the list of output summaries
     params: dict, the hyperparameters
     '''
-
     def rank_beam(indices, left, right, input, output, params):
         if right - left > 1:
             mid = (left + right) // 2
@@ -242,11 +212,11 @@ def PairsBeam(input, output, params):
             merge_with_confidence_beam(indices, left, mid, right, input, output, params)
         return indices
     
-    if params['engine'] in ["mistralai/Mistral-7B-Instruct-v0.1", "mistralai/Mistral-7B-Instruct-v0.2"]:
-        params['model'] = MistralModelLocal(params={'model': params['engine']})
-    elif 'llama' in params['engine']:
-        params['model'] = Llama2ModelLocal(params={'model': params['engine']})
-    
+    if 'model' not in params:
+        if 'gpt' in params['engine']:
+            params['model'] = OpenAIChatModel({'engine': params['engine']})
+        else:
+            params['model'] = LocalModel(params={'model': params['engine']})
     params['progress_bar'] = tqdm(total=int(len(output)**2), desc='Processing')
 
     indices = list(range(len(output)))

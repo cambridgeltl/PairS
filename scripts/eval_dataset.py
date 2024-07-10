@@ -1,16 +1,20 @@
-from utils import shuffle_lists, calculate_correlation, load_newsroom, load_summEval, calculate_uncertainty, load_sf_data, CompareResultObject, insert_index_to_anchors
-import random
-from sorting import merge_sort_indices
+from utils import shuffle_lists, calculate_correlation, load_newsroom, load_summEval
+# from sorting import merge_sort_indices
 import numpy as np
 from tqdm import tqdm
-import json
-
+from prompts import get_prompt_template, get_aspect_instruction
+from jinja2 import Template, DebugUndefined
+# import json
+import sys
+sys.path.append('..')
+from pairs import PairsGreedy, PairsBeam
 
 
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset', type=str, default='SumEval')
+    parser.add_argument('--method', type=str, default='PairsGreedy')
     parser.add_argument('--save_path', type=str, default='./results.jsonl')
     parser.add_argument('--aspect', type=str, default='coherence')
     parser.add_argument('--eval_method', type=str, default='pairwise comparison')
@@ -21,7 +25,7 @@ if __name__ == "__main__":
     parser.add_argument('--prob_gap', type=float, default=0.15)
     parser.add_argument('--beam_size', type=int, default=100)
     parser.add_argument('--with_input', action="store_true")
-    parser.add_argument('--calibration', action="store_true")
+    parser.add_argument('--calibrate', action="store_true")
     args = parser.parse_args()
 
     print('aspect:', args.aspect)
@@ -29,7 +33,7 @@ if __name__ == "__main__":
     print('dataset:', args.dataset)
     print('confidence_beam:', args.confidence_beam)
     print('beam_size:', args.beam_size)
-    print('calibration:', args.calibration)
+    print('calibration:', args.calibrate)
 
     params = {
         'dataset': args.dataset,
@@ -42,19 +46,32 @@ if __name__ == "__main__":
         'prob_gap': args.prob_gap,
         'with_input': args.with_input,
         'compare_log': {},
-        'calibration': args.calibration,
+        'calibrate': args.calibrate,
     }
+    
+    # prepare prompt template
+    prompt_instruction = get_aspect_instruction(params['aspect'], eval_method=params['eval_method'], dataset=params['dataset'])
+    prompt_template = get_prompt_template(
+            prompt_name=params['eval_method'], 
+            model_name=params['engine'], 
+            aspect=params['aspect'], 
+            dataset=params['dataset'],
+            with_input=params['with_input']
+        )
+    prompt_template = Template(prompt_template, undefined=DebugUndefined).render(instruction=prompt_instruction)
+    params['prompt_template'] = prompt_template
+    
     # Load the dataset
-    if args.dataset == 'SumEval':
-        summ_eval_path = 'data/SummEval/model_annotations.aligned.paired.jsonl'
+    if args.dataset == 'SummEval':
+        summ_eval_path = '../data/SummEval/model_annotations.aligned.paired.jsonl'
         input_doc, output_doc, scores_doc = load_summEval(summ_eval_path, flat_output=False)
     elif args.dataset == 'newsroom':
-        newsroom_path = 'data/newsroom/newsroom.json'
+        newsroom_path = '../data/newsroom/newsroom.json'
         input_doc, output_doc, scores_doc = load_newsroom(newsroom_path, flat_output=False)
     else:
         print('Dataset not supported.')
         assert False
-
+        
     scores_doc = scores_doc[args.aspect]
     ranking_indices_list = []
     scores_list = []
@@ -63,13 +80,19 @@ if __name__ == "__main__":
     spearman_corr_list, kendall_tau_list = [], []
     for input, output, scores in zip(input_doc, output_doc, scores_doc):
         input, output, scores = shuffle_lists(input, output, scores)
-        ranking_indices = merge_sort_indices(input, output, params)
+        # ranking_indices = merge_sort_indices(input, output, params)
+        if args.method == 'PairsGreedy':
+            ranking_indices = PairsGreedy(input[0], output, params)
+        elif args.method == 'PairsBeam':
+            ranking_indices = PairsBeam(input[0], output, params)
+        else:
+            print('Wrong method. should be either PairsGreedy or PairsBeam')
+            assert False
         ranking_indices_list.append([idx+base_idx_cnt for idx in ranking_indices])
         scores_list.append(scores)
         base_idx_cnt += len(input)
         progress_bar.update(1)
-        print(np.array(scores)[ranking_indices])
-        spearman_corr, kendall_tau, mae = calculate_correlation(np.array(scores)[ranking_indices], list(range(len(scores))))
+        spearman_corr, kendall_tau = calculate_correlation(np.array(scores)[ranking_indices], list(range(len(scores))))
         spearman_corr_list.append(spearman_corr)
         kendall_tau_list.append(kendall_tau)
         print('api_call:', params['api_call'])
@@ -102,4 +125,4 @@ if __name__ == "__main__":
     print('dataset:', args.dataset)
     print('confidence_beam:', args.confidence_beam)
     print('beam_size:', params['beam_size'])
-    print('calibration:', args.calibration)
+    print('calibration:', args.calibrate)
