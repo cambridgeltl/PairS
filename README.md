@@ -2,15 +2,18 @@
 
 ![pairs](figs/pairs.png)
 **Link to paper**:
-[Aligning with Human Judgement: The Role of Pairwise Preference in Large Language Model Evaluators](https://arxiv.org/abs/2403.16950) (arXiv preprint arXiv:2403.16950)
+[Aligning with Human Judgement: The Role of Pairwise Preference in Large Language Model Evaluators](https://arxiv.org/abs/2403.16950) (arXiv preprint arXiv:2403.16950)  
+This paper has been accepted by **COLM 2024**.
 
+If you are interested in pairwise evaluator, please also checkout our latest work on [zero-shot automatic prompt optimization for pairwise evaluators](https://arxiv.org/abs/2406.11370). 
 
 ## Code
 
 ### Ready-to-use Package
 We provide a ready-to-use Python library for Pairwise preference ranking (PairS). We show a ranking demonstration below.
 For an input source text and a sequence of output candidates, ```PairsGreedy``` and ```PairsBeam``` can be used to rank the output candidates in **ascending** order.
-We currently support three base models ```Llama2```, ```Mistral-7B``` and ```GPT-turbo```. 
+We currently support the following base models: ```google/gemma-2-9b-it, google/gemma-2-27b-it, meta-llama/Meta-Llama-3-8B-Instruct, microsoft/Phi-3-medium-4k-instruct, microsoft/Phi-3-mini-4k-instruct, mistralai/Mistral-7B-Instruct-v0.1, meta-llama/Llama-2-7b-chat-hf, meta-llama/Llama-2-13b-chat-hf, HuggingFaceH4/zephyr-7b-beta```. 
+
 
 ```python
 from pairs import PairsGreedy, PairsBeam
@@ -36,6 +39,7 @@ if method == 'PairsGreedy':
         'engine': "meta-llama/Llama-2-7b-chat-hf",
         'api_call': 0,
         'with_input': True,
+        'calibrate': False,
     }
     # Rank the output summaries from low to high quality
     indices = PairsGreedy(input[0], output, params)
@@ -49,6 +53,7 @@ elif method == 'PairsBeam':
         'api_call': 0,
         'prob_gap': 0.1,
         'with_input': True,
+        'calibrate': False,
     }
     # Rank the output summaries from low to high quality
     indices = PairsBeam(input[0], output, params)
@@ -64,10 +69,10 @@ For NewsRoom and SummEval
 bash pairs_run.sh
 ```
 
-For Hanna
+<!-- For Hanna
 ```python
 bash pairs_flat_run
-```
+``` -->
 
 ### Notebook Demo
 We provide a Notebook demonstrations in ```notebooks/```.
