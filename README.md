@@ -91,6 +91,7 @@ We provide a Notebook demonstrations in ```notebooks/```.
   - ```with_input```: If the data format has input text. For example, the summarization task has source text as input, but story writing task has no input text.
   - ```confidence_beam```: ```True``` for PairS-beam and ```False``` for PairS-greedy.
   - ```prob_gap```: The uncertainty tolerance. $0.1$ represents we will create beam candidates for both A and B if $0.5-0.1 < P(A\succ B) < 0.5+0.1$.
+  - ```calibrate```: LLMs suffer from positional bias. Set this as ```True``` will average the probabilities of both permutations of A and B for each pairwise comparison. This will cancel the positional bias.
 
 More details and comments will be added soon.
 
