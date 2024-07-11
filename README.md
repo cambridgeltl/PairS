@@ -38,8 +38,8 @@ if method == 'PairsGreedy':
         # 'engine': "mistralai/Mistral-7B-Instruct-v0.1",
         'engine': "meta-llama/Llama-2-7b-chat-hf",
         'api_call': 0,
-        'with_input': True,
-        'calibrate': False,
+        'with_input': True,   # Use the prompt template for task with context input, e.g. Summarization 
+        'calibrate': False,   # For each pairwise comparison, we average the probabilities of both permutations to cancel the positional bias.
     }
     # Rank the output summaries from low to high quality
     indices = PairsGreedy(input[0], output, params)
