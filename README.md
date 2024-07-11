@@ -12,7 +12,7 @@ If you are interested in pairwise evaluator, please also checkout our latest wor
 ### Ready-to-use Package
 We provide a ready-to-use Python library for Pairwise preference ranking (PairS). We show a ranking demonstration below.
 For an input source text and a sequence of output candidates, ```PairsGreedy``` and ```PairsBeam``` can be used to rank the output candidates in **ascending** order.
-We currently support the following base models: ```google/gemma-2-9b-it, google/gemma-2-27b-it, meta-llama/Meta-Llama-3-8B-Instruct, microsoft/Phi-3-medium-4k-instruct, microsoft/Phi-3-mini-4k-instruct, mistralai/Mistral-7B-Instruct-v0.1, meta-llama/Llama-2-7b-chat-hf, meta-llama/Llama-2-13b-chat-hf, HuggingFaceH4/zephyr-7b-beta```. 
+We currently support the following base models: ```google/gemma-2-9b-it, google/gemma-2-27b-it, meta-llama/Meta-Llama-3-8B-Instruct, microsoft/Phi-3-medium-4k-instruct, microsoft/Phi-3-mini-4k-instruct, mistralai/Mistral-7B-Instruct-v0.1, meta-llama/Llama-2-7b-chat-hf, meta-llama/Llama-2-13b-chat-hf, HuggingFaceH4/zephyr-7b-beta, gpt-3.5-turbo, gpt-4-turbo```. 
 
 
 ```python
