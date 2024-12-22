@@ -45,8 +45,10 @@ def is_better_than_prob(id1, id2, input, output, params, api_key=None):
         )
         compare_result_reverse = params['model'].compare([prompt])[0]
         compare_result = CompareResultObject(
-                raw_prob_A=compare_result.prob_A + 1-compare_result_reverse.prob_B, 
-                raw_prob_B=compare_result.prob_B + 1-compare_result_reverse.prob_A, 
+                # raw_prob_A=compare_result.prob_A + 1-compare_result_reverse.prob_B, 
+                # raw_prob_B=compare_result.prob_B + 1-compare_result_reverse.prob_A, 
+                raw_prob_A=(compare_result.prob_A + compare_result_reverse.prob_B)/2, 
+                raw_prob_B=(compare_result.prob_B + compare_result_reverse.prob_A)/2, 
                 raw_prob_C=compare_result.prob_C + compare_result_reverse.prob_C, 
                 uncertainty=(compare_result.uncertainty + compare_result_reverse.uncertainty)/2
             )
