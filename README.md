@@ -1,4 +1,6 @@
-# Code for Aligning with Human Judgement: The Role of Pairwise Preference in Large Language Model Evaluators
+# PairS: Pairwise Preference Search-based Rank Aggregation (PairS)
+
+Code for paper *Aligning with Human Judgement: The Role of Pairwise Preference in Large Language Model Evaluators*
 
 ![pairs](figs/pairs.png)
 **Link to paper**:
